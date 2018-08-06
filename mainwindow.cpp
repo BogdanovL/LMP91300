@@ -77,7 +77,7 @@ unsigned MainWindow::buildPulses(rw_enumType cmd, gpioPulse_t *destPulse, unsign
     destPulse[numPulses++] = buildPulseBit(DUTY_PERCENT_IDLE, TRANSMISSION_HZ, gpioPin).firstPulse;
     destPulse[numPulses++] = buildPulseBit(DUTY_PERCENT_IDLE, TRANSMISSION_HZ, gpioPin).secondPulse;
 
-    /* --- Build wrote pulse (bit is zero) ---*/
+    /* --- Build write pulse (bit is zero) ---*/
     if (cmd == WRITE)
     {
         destPulse[numPulses++] = buildPulseBit(DUTY_PERCENT_LOW, TRANSMISSION_HZ, gpioPin).firstPulse;
