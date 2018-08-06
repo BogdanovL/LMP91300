@@ -7,12 +7,23 @@
 #include <QVector>
 #include <QtGui>
 
+// General defines
+#define BITS_IN_BYTE 8
+#define BITS_IN_ADDRESS 7
+
+// Transaction defines
 #define MAX_BYTES_PER_TRANSACTION 8
-#define BITS_PER_BYTE 8
 #define NUM_IDLE_PULSES 1
 #define NUM_CTRL_PULSES 7
-#define NUM_DATA_PULSES (BITS_PER_BYTE * MAX_BYTES_PER_TRANSACTION)
+#define NUM_DATA_PULSES (BITS_IN_BYTE * MAX_BYTES_PER_TRANSACTION)
 #define MAX_PULSES ((NUM_IDLE_PULSES + NUM_CTRL_PULSES + NUM_DATA_PULSES)*2) // each pulse is actually two
+#define TRANSMISSION_HZ 2500
+
+#define DUTY_PERCENT_HIGH 75
+#define DUTY_PERCENT_LOW 25
+#define DUTY_PERCENT_IDLE 50
+
+// HW defines
 #define GPIO_TX_PIN 4
 #define GPIO_RX_PIN 12
 #define GPIO_RD_EN_PIN 17

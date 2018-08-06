@@ -26,7 +26,7 @@ static void _cb(int gpio, int level, uint32_t tick, void *user)
 
 }
 
-static gpioBit_t BuildBit(unsigned duty, unsigned hz, unsigned gpioPin)
+static gpioBit_t buildBit(unsigned duty, unsigned hz, unsigned gpioPin)
 {
     gpioBit_t retVal;
 
@@ -50,13 +50,8 @@ static gpioBit_t BuildBit(unsigned duty, unsigned hz, unsigned gpioPin)
 
     return retVal;
 }
-#define TRANSMISSION_HZ 2500
-#define DUTY_PERCENT_HIGH 75
-#define DUTY_PERCENT_LOW 25
-#define DUTY_PERCENT_IDLE 50
-#define BITS_IN_ADDRESS 7
-#define BITS_IN_BYTE 8
-static unsigned BuildPulses(rw_enumType cmd, gpioPulse_t *destPulse, unsigned gpioPin, unsigned address, unsigned numDataBytes, unsigned *dataBytes)
+
+static unsigned buildPulses(rw_enumType cmd, gpioPulse_t *destPulse, unsigned gpioPin, unsigned address, unsigned numDataBytes, unsigned *dataBytes)
 {
 
     unsigned numPulses = 0;
@@ -65,19 +60,19 @@ static unsigned BuildPulses(rw_enumType cmd, gpioPulse_t *destPulse, unsigned gp
         return 0;
 
     /* --- Build idle pulse ---*/
-    destPulse[numPulses++] = BuildBit(DUTY_PERCENT_IDLE, TRANSMISSION_HZ, gpioPin).firstPulse;
-    destPulse[numPulses++] = BuildBit(DUTY_PERCENT_IDLE, TRANSMISSION_HZ, gpioPin).secondPulse;
+    destPulse[numPulses++] = buildBit(DUTY_PERCENT_IDLE, TRANSMISSION_HZ, gpioPin).firstPulse;
+    destPulse[numPulses++] = buildBit(DUTY_PERCENT_IDLE, TRANSMISSION_HZ, gpioPin).secondPulse;
 
     /* --- Build wrote pulse (bit is zero) ---*/
     if (cmd == WRITE)
     {
-        destPulse[numPulses++] = BuildBit(DUTY_PERCENT_LOW, TRANSMISSION_HZ, gpioPin).firstPulse;
-        destPulse[numPulses++] = BuildBit(DUTY_PERCENT_LOW, TRANSMISSION_HZ, gpioPin).secondPulse;
+        destPulse[numPulses++] = buildBit(DUTY_PERCENT_LOW, TRANSMISSION_HZ, gpioPin).firstPulse;
+        destPulse[numPulses++] = buildBit(DUTY_PERCENT_LOW, TRANSMISSION_HZ, gpioPin).secondPulse;
     }
     else
     {
-        destPulse[numPulses++] = BuildBit(DUTY_PERCENT_HIGH, TRANSMISSION_HZ, gpioPin).firstPulse;
-        destPulse[numPulses++] = BuildBit(DUTY_PERCENT_HIGH, TRANSMISSION_HZ, gpioPin).secondPulse;
+        destPulse[numPulses++] = buildBit(DUTY_PERCENT_HIGH, TRANSMISSION_HZ, gpioPin).firstPulse;
+        destPulse[numPulses++] = buildBit(DUTY_PERCENT_HIGH, TRANSMISSION_HZ, gpioPin).secondPulse;
 
     }
 
@@ -88,16 +83,16 @@ static unsigned BuildPulses(rw_enumType cmd, gpioPulse_t *destPulse, unsigned gp
         if (address & i)
         {
             // Build One-pulse (bit is zero)
-            destPulse[numPulses++] = BuildBit(DUTY_PERCENT_HIGH, TRANSMISSION_HZ, gpioPin).firstPulse;
-            destPulse[numPulses++] = BuildBit(DUTY_PERCENT_HIGH, TRANSMISSION_HZ, gpioPin).secondPulse;
+            destPulse[numPulses++] = buildBit(DUTY_PERCENT_HIGH, TRANSMISSION_HZ, gpioPin).firstPulse;
+            destPulse[numPulses++] = buildBit(DUTY_PERCENT_HIGH, TRANSMISSION_HZ, gpioPin).secondPulse;
         }
 
         // If bit is a zero, encode a zero
         else
         {
             // Build One-pulse (bit is zero)
-            destPulse[numPulses++] = BuildBit(DUTY_PERCENT_LOW, TRANSMISSION_HZ, gpioPin).firstPulse;
-            destPulse[numPulses++] = BuildBit(DUTY_PERCENT_LOW, TRANSMISSION_HZ, gpioPin).secondPulse;
+            destPulse[numPulses++] = buildBit(DUTY_PERCENT_LOW, TRANSMISSION_HZ, gpioPin).firstPulse;
+            destPulse[numPulses++] = buildBit(DUTY_PERCENT_LOW, TRANSMISSION_HZ, gpioPin).secondPulse;
         }
     }
 
@@ -112,22 +107,22 @@ static unsigned BuildPulses(rw_enumType cmd, gpioPulse_t *destPulse, unsigned gp
             if (dataBytes[i] & j)
             {
                 // Build One-pulse (bit is zero)
-                destPulse[numPulses++] = BuildBit(DUTY_PERCENT_HIGH, TRANSMISSION_HZ, gpioPin).firstPulse;
-                destPulse[numPulses++] = BuildBit(DUTY_PERCENT_HIGH, TRANSMISSION_HZ, gpioPin).secondPulse;
+                destPulse[numPulses++] = buildBit(DUTY_PERCENT_HIGH, TRANSMISSION_HZ, gpioPin).firstPulse;
+                destPulse[numPulses++] = buildBit(DUTY_PERCENT_HIGH, TRANSMISSION_HZ, gpioPin).secondPulse;
             }
 
             // If bit is a zero, encode a zero
             else
             {
                 // Build One-pulse (bit is zero)
-                destPulse[numPulses++] = BuildBit(DUTY_PERCENT_LOW, TRANSMISSION_HZ, gpioPin).firstPulse;
-                destPulse[numPulses++] = BuildBit(DUTY_PERCENT_LOW, TRANSMISSION_HZ, gpioPin).secondPulse;
+                destPulse[numPulses++] = buildBit(DUTY_PERCENT_LOW, TRANSMISSION_HZ, gpioPin).firstPulse;
+                destPulse[numPulses++] = buildBit(DUTY_PERCENT_LOW, TRANSMISSION_HZ, gpioPin).secondPulse;
             }
         }
     }
     /* --- Build idle pulse ---*/
-    destPulse[numPulses++] = BuildBit(DUTY_PERCENT_IDLE, TRANSMISSION_HZ, gpioPin).firstPulse;
-    destPulse[numPulses++] = BuildBit(DUTY_PERCENT_IDLE, TRANSMISSION_HZ, gpioPin).secondPulse;
+    destPulse[numPulses++] = buildBit(DUTY_PERCENT_IDLE, TRANSMISSION_HZ, gpioPin).firstPulse;
+    destPulse[numPulses++] = buildBit(DUTY_PERCENT_IDLE, TRANSMISSION_HZ, gpioPin).secondPulse;
 
     return numPulses;
 }
@@ -146,15 +141,6 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-#define MAX_BYTES_PER_TRANSACTION 8
-#define BITS_PER_BYTE 8
-#define NUM_IDLE_PULSES 1
-#define NUM_CTRL_PULSES 7
-#define NUM_DATA_PULSES (BITS_PER_BYTE * MAX_BYTES_PER_TRANSACTION)
-#define MAX_PULSES ((NUM_IDLE_PULSES + NUM_CTRL_PULSES + NUM_DATA_PULSES)*2) // each pulse is actually two
-#define GPIO_TX_PIN 4
-#define GPIO_RX_PIN 12
-#define GPIO_FUTURE 1
 void MainWindow::on_Write_clicked()
 {
     gpioPulse_t pulse[MAX_PULSES];
@@ -188,7 +174,7 @@ void MainWindow::on_Write_clicked()
         data[dataIdx++] = temp.toUInt(&ok, 16);
     }
 
-    unsigned numPulses = BuildPulses(WRITE, pulse, GPIO_TX_PIN, address, dataIdx, data);
+    unsigned numPulses = buildPulses(WRITE, pulse, GPIO_TX_PIN, address, dataIdx, data);
     gpioSetMode(GPIO_TX_PIN, PI_OUTPUT);
 
     int wave_id;
@@ -373,7 +359,7 @@ void MainWindow::on_Read_clicked()
         return;
     }
     // Build the pulses for the read command
-    unsigned numPulses = BuildPulses(READ, pulse, GPIO_TX_PIN, address, 0, 0);
+    unsigned numPulses = buildPulses(READ, pulse, GPIO_TX_PIN, address, 0, 0);
 
     // Set the GPIO to output
     gpioSetMode(GPIO_TX_PIN, PI_OUTPUT);
