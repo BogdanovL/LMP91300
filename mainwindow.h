@@ -33,19 +33,21 @@
 namespace Ui {
 class MainWindow;
 }
-
+// A bit is represented as two pulses
 typedef struct
 {
     gpioPulse_t firstPulse;
     gpioPulse_t secondPulse;
 } gpioBit_t;
 
+// Read data from GPIO is encoded in the following vectors
 typedef struct
 {
     QVector<unsigned> *rising;
     QVector<unsigned> *falling;
 } waveform_t;
 
+// The RW bit can be either of these values
 typedef enum
 {
     READ,
@@ -63,16 +65,22 @@ public:
 
 private:
     Ui::MainWindow *ui;
+    // Seperate chart window
     ChartWindow *cw;
 
-
-    void buildChart(QVector<unsigned> riseTimes, QVector<unsigned> fallTimes, unsigned periodInUS, QVector<unsigned> bits);
-
-    void buildResultString(QVector<unsigned> bits, QString resultString, unsigned result, double freq);
+    // Build a pulse representing one bit
+    gpioBit_t buildPulseBit(unsigned duty, unsigned hz, unsigned gpioPin);
+    // Build pulse train representing all data
+    unsigned buildPulses(rw_enumType cmd, gpioPulse_t *destPulse, unsigned gpioPin, unsigned address, unsigned numDataBytes, unsigned *dataBytes);
+    // Show chart with read data
+    void buildAndShowChart(QVector<unsigned> riseTimes, QVector<unsigned> fallTimes, unsigned periodInUS, QVector<unsigned> bits);
 
 private slots:
+    // Encode and write the data from the GUI to the GPIO
     void on_Write_clicked();
+    // Encode and write 'read' data onto the GPIO and analyze the result
     void on_Read_clicked();
+    // Set GPIO on/off
     void on_checkBox_clicked();
 };
 

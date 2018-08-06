@@ -12,6 +12,7 @@
 #include <QtCharts/QCategoryAxis>
 #include <QtCharts/QLineSeries>
 
+// GPIO callback (when a pin changes state this is called)
 static void _cb(int gpio, int level, uint32_t tick, void *user)
 {
     switch (level)
@@ -26,7 +27,20 @@ static void _cb(int gpio, int level, uint32_t tick, void *user)
 
 }
 
-static gpioBit_t buildBit(unsigned duty, unsigned hz, unsigned gpioPin)
+MainWindow::MainWindow(ChartWindow *w, QWidget *parent) :
+    QMainWindow(parent),
+    ui(new Ui::MainWindow)
+{
+    ui->setupUi(this);
+    cw = w;
+}
+
+MainWindow::~MainWindow()
+{
+    delete ui;
+}
+
+gpioBit_t MainWindow::buildPulseBit(unsigned duty, unsigned hz, unsigned gpioPin)
 {
     gpioBit_t retVal;
 
@@ -51,7 +65,7 @@ static gpioBit_t buildBit(unsigned duty, unsigned hz, unsigned gpioPin)
     return retVal;
 }
 
-static unsigned buildPulses(rw_enumType cmd, gpioPulse_t *destPulse, unsigned gpioPin, unsigned address, unsigned numDataBytes, unsigned *dataBytes)
+unsigned MainWindow::buildPulses(rw_enumType cmd, gpioPulse_t *destPulse, unsigned gpioPin, unsigned address, unsigned numDataBytes, unsigned *dataBytes)
 {
 
     unsigned numPulses = 0;
@@ -60,19 +74,19 @@ static unsigned buildPulses(rw_enumType cmd, gpioPulse_t *destPulse, unsigned gp
         return 0;
 
     /* --- Build idle pulse ---*/
-    destPulse[numPulses++] = buildBit(DUTY_PERCENT_IDLE, TRANSMISSION_HZ, gpioPin).firstPulse;
-    destPulse[numPulses++] = buildBit(DUTY_PERCENT_IDLE, TRANSMISSION_HZ, gpioPin).secondPulse;
+    destPulse[numPulses++] = buildPulseBit(DUTY_PERCENT_IDLE, TRANSMISSION_HZ, gpioPin).firstPulse;
+    destPulse[numPulses++] = buildPulseBit(DUTY_PERCENT_IDLE, TRANSMISSION_HZ, gpioPin).secondPulse;
 
     /* --- Build wrote pulse (bit is zero) ---*/
     if (cmd == WRITE)
     {
-        destPulse[numPulses++] = buildBit(DUTY_PERCENT_LOW, TRANSMISSION_HZ, gpioPin).firstPulse;
-        destPulse[numPulses++] = buildBit(DUTY_PERCENT_LOW, TRANSMISSION_HZ, gpioPin).secondPulse;
+        destPulse[numPulses++] = buildPulseBit(DUTY_PERCENT_LOW, TRANSMISSION_HZ, gpioPin).firstPulse;
+        destPulse[numPulses++] = buildPulseBit(DUTY_PERCENT_LOW, TRANSMISSION_HZ, gpioPin).secondPulse;
     }
     else
     {
-        destPulse[numPulses++] = buildBit(DUTY_PERCENT_HIGH, TRANSMISSION_HZ, gpioPin).firstPulse;
-        destPulse[numPulses++] = buildBit(DUTY_PERCENT_HIGH, TRANSMISSION_HZ, gpioPin).secondPulse;
+        destPulse[numPulses++] = buildPulseBit(DUTY_PERCENT_HIGH, TRANSMISSION_HZ, gpioPin).firstPulse;
+        destPulse[numPulses++] = buildPulseBit(DUTY_PERCENT_HIGH, TRANSMISSION_HZ, gpioPin).secondPulse;
 
     }
 
@@ -83,16 +97,16 @@ static unsigned buildPulses(rw_enumType cmd, gpioPulse_t *destPulse, unsigned gp
         if (address & i)
         {
             // Build One-pulse (bit is zero)
-            destPulse[numPulses++] = buildBit(DUTY_PERCENT_HIGH, TRANSMISSION_HZ, gpioPin).firstPulse;
-            destPulse[numPulses++] = buildBit(DUTY_PERCENT_HIGH, TRANSMISSION_HZ, gpioPin).secondPulse;
+            destPulse[numPulses++] = buildPulseBit(DUTY_PERCENT_HIGH, TRANSMISSION_HZ, gpioPin).firstPulse;
+            destPulse[numPulses++] = buildPulseBit(DUTY_PERCENT_HIGH, TRANSMISSION_HZ, gpioPin).secondPulse;
         }
 
         // If bit is a zero, encode a zero
         else
         {
             // Build One-pulse (bit is zero)
-            destPulse[numPulses++] = buildBit(DUTY_PERCENT_LOW, TRANSMISSION_HZ, gpioPin).firstPulse;
-            destPulse[numPulses++] = buildBit(DUTY_PERCENT_LOW, TRANSMISSION_HZ, gpioPin).secondPulse;
+            destPulse[numPulses++] = buildPulseBit(DUTY_PERCENT_LOW, TRANSMISSION_HZ, gpioPin).firstPulse;
+            destPulse[numPulses++] = buildPulseBit(DUTY_PERCENT_LOW, TRANSMISSION_HZ, gpioPin).secondPulse;
         }
     }
 
@@ -107,38 +121,24 @@ static unsigned buildPulses(rw_enumType cmd, gpioPulse_t *destPulse, unsigned gp
             if (dataBytes[i] & j)
             {
                 // Build One-pulse (bit is zero)
-                destPulse[numPulses++] = buildBit(DUTY_PERCENT_HIGH, TRANSMISSION_HZ, gpioPin).firstPulse;
-                destPulse[numPulses++] = buildBit(DUTY_PERCENT_HIGH, TRANSMISSION_HZ, gpioPin).secondPulse;
+                destPulse[numPulses++] = buildPulseBit(DUTY_PERCENT_HIGH, TRANSMISSION_HZ, gpioPin).firstPulse;
+                destPulse[numPulses++] = buildPulseBit(DUTY_PERCENT_HIGH, TRANSMISSION_HZ, gpioPin).secondPulse;
             }
 
             // If bit is a zero, encode a zero
             else
             {
                 // Build One-pulse (bit is zero)
-                destPulse[numPulses++] = buildBit(DUTY_PERCENT_LOW, TRANSMISSION_HZ, gpioPin).firstPulse;
-                destPulse[numPulses++] = buildBit(DUTY_PERCENT_LOW, TRANSMISSION_HZ, gpioPin).secondPulse;
+                destPulse[numPulses++] = buildPulseBit(DUTY_PERCENT_LOW, TRANSMISSION_HZ, gpioPin).firstPulse;
+                destPulse[numPulses++] = buildPulseBit(DUTY_PERCENT_LOW, TRANSMISSION_HZ, gpioPin).secondPulse;
             }
         }
     }
     /* --- Build idle pulse ---*/
-    destPulse[numPulses++] = buildBit(DUTY_PERCENT_IDLE, TRANSMISSION_HZ, gpioPin).firstPulse;
-    destPulse[numPulses++] = buildBit(DUTY_PERCENT_IDLE, TRANSMISSION_HZ, gpioPin).secondPulse;
+    destPulse[numPulses++] = buildPulseBit(DUTY_PERCENT_IDLE, TRANSMISSION_HZ, gpioPin).firstPulse;
+    destPulse[numPulses++] = buildPulseBit(DUTY_PERCENT_IDLE, TRANSMISSION_HZ, gpioPin).secondPulse;
 
     return numPulses;
-}
-
-
-MainWindow::MainWindow(ChartWindow *w, QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow)
-{
-    ui->setupUi(this);
-    cw = w;
-}
-
-MainWindow::~MainWindow()
-{
-    delete ui;
 }
 
 void MainWindow::on_Write_clicked()
@@ -203,14 +203,13 @@ void MainWindow::on_Write_clicked()
 
 }
 
-
 #define WITHIN_TOLERANCE_DC_HIGH(fall, rise, period)  \
     ((fall < (rise + .75 * period) + 20) && (fall > (rise + .75 * period) - 20))
 #define WITHIN_TOLERANCE_DC_LOW(fall, rise, period)  \
     ((fall < (rise + .25 * period) + 20) && (fall > (rise + .25 * period) - 20))
 #define WITHIN_TOLERANCE_DC_IDLE(fall, rise, period)  \
     ((fall < (rise + .50 * period) + 20) && (fall > (rise + .50 * period) - 20))
-void MainWindow::buildChart(QVector<unsigned> riseTimes, QVector<unsigned> fallTimes, unsigned periodInUS, QVector<unsigned> bits)
+void MainWindow::buildAndShowChart(QVector<unsigned> riseTimes, QVector<unsigned> fallTimes, unsigned periodInUS, QVector<unsigned> bits)
 {
     QT_CHARTS_USE_NAMESPACE
 
@@ -465,7 +464,7 @@ void MainWindow::on_Read_clicked()
             " khz." + " Data was" + data;
 
     // Build a chart for display (lets QT it up)
-    buildChart(riseTimes, fallTimes, periodInUS, bits);
+    buildAndShowChart(riseTimes, fallTimes, periodInUS, bits);
 
     // Display what we know
     QMessageBox::information(this, "Result Window",  resultString);
@@ -473,7 +472,6 @@ void MainWindow::on_Read_clicked()
 
     return;
 }
-
 
 void MainWindow::on_checkBox_clicked()
 {
