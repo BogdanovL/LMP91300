@@ -77,7 +77,7 @@ unsigned MainWindow::buildPulses(rw_enumType cmd, gpioPulse_t *destPulse, unsign
     destPulse[numPulses++] = buildPulseBit(DUTY_PERCENT_IDLE, TRANSMISSION_HZ, gpioPin).firstPulse;
     destPulse[numPulses++] = buildPulseBit(DUTY_PERCENT_IDLE, TRANSMISSION_HZ, gpioPin).secondPulse;
 
-    /* --- Build write pulse (bit is zero) ---*/
+    /* --- Build read/write pulse ---*/
     if (cmd == WRITE)
     {
         destPulse[numPulses++] = buildPulseBit(DUTY_PERCENT_LOW, TRANSMISSION_HZ, gpioPin).firstPulse;
@@ -93,10 +93,9 @@ unsigned MainWindow::buildPulses(rw_enumType cmd, gpioPulse_t *destPulse, unsign
     /* --- Build address pulse ---*/
     for (unsigned i = 1<<(BITS_IN_ADDRESS-1); i != 0; i>>=1)
     {
-        // If bit is z one, encode a 1
+        // If bit is a one, encode a 1
         if (address & i)
         {
-            // Build One-pulse (bit is zero)
             destPulse[numPulses++] = buildPulseBit(DUTY_PERCENT_HIGH, TRANSMISSION_HZ, gpioPin).firstPulse;
             destPulse[numPulses++] = buildPulseBit(DUTY_PERCENT_HIGH, TRANSMISSION_HZ, gpioPin).secondPulse;
         }
@@ -104,7 +103,6 @@ unsigned MainWindow::buildPulses(rw_enumType cmd, gpioPulse_t *destPulse, unsign
         // If bit is a zero, encode a zero
         else
         {
-            // Build One-pulse (bit is zero)
             destPulse[numPulses++] = buildPulseBit(DUTY_PERCENT_LOW, TRANSMISSION_HZ, gpioPin).firstPulse;
             destPulse[numPulses++] = buildPulseBit(DUTY_PERCENT_LOW, TRANSMISSION_HZ, gpioPin).secondPulse;
         }
@@ -117,10 +115,9 @@ unsigned MainWindow::buildPulses(rw_enumType cmd, gpioPulse_t *destPulse, unsign
         // Build address pulse
             for (unsigned j = 1<<(BITS_IN_BYTE-1); j != 0; j>>=1)
         {
-            // If bit is z one, encode a 1
+            // If bit is a one, encode a 1
             if (dataBytes[i] & j)
             {
-                // Build One-pulse (bit is zero)
                 destPulse[numPulses++] = buildPulseBit(DUTY_PERCENT_HIGH, TRANSMISSION_HZ, gpioPin).firstPulse;
                 destPulse[numPulses++] = buildPulseBit(DUTY_PERCENT_HIGH, TRANSMISSION_HZ, gpioPin).secondPulse;
             }
@@ -128,7 +125,6 @@ unsigned MainWindow::buildPulses(rw_enumType cmd, gpioPulse_t *destPulse, unsign
             // If bit is a zero, encode a zero
             else
             {
-                // Build One-pulse (bit is zero)
                 destPulse[numPulses++] = buildPulseBit(DUTY_PERCENT_LOW, TRANSMISSION_HZ, gpioPin).firstPulse;
                 destPulse[numPulses++] = buildPulseBit(DUTY_PERCENT_LOW, TRANSMISSION_HZ, gpioPin).secondPulse;
             }
